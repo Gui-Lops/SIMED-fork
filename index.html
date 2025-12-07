@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedSchedule Pro</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Configuration -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: '#1B325F',
+                light: '#2c4875',
+              },
+              accent: {
+                DEFAULT: '#F26C4F',
+                hover: '#e55a3d',
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f5f7fa;
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.4s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      /* Custom scrollbar for better aesthetics */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-4 md:p-8 lg:p-12 text-slate-800">
+
+    <div class="max-w-[1400px] mx-auto">
+        
+        <!-- Header -->
+        <header class="text-center mb-10 md:mb-14">
+          <div class="inline-flex items-center justify-center p-3 bg-white rounded-2xl shadow-sm mb-4">
+             <i data-lucide="calendar-check" class="w-8 h-8 text-primary mr-2"></i>
+             <span class="font-bold text-primary text-xl">MedSchedule</span>
+          </div>
+          <h1 class="text-3xl md:text-5xl font-bold text-primary mb-3">
+            Agendar Consulta
+          </h1>
+          <p class="text-gray-500 text-lg">
+            Escolha a data, horário e profissional ideal para você
+          </p>
+        </header>
+
+        <!-- Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8 items-start">
+          
+          <!-- Left Column: Calendar -->
+          <div class="lg:sticky lg:top-8">
+            <div class="bg-white rounded-3xl p-6 shadow-xl w-full max-w-md mx-auto lg:mx-0">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="calendar-month-year" class="text-xl font-bold text-primary capitalize">
+                        <!-- JS injected -->
+                    </h2>
+                    <div class="flex gap-2">
+                        <button id="prev-month" class="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-light text-white hover:scale-105 transition-transform">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <button id="next-month" class="w-10 h-10 flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-light text-white hover:scale-105 transition-transform">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-7 gap-2 mb-2">
+                    <div class="text-center text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide">Dom</div>
+                    <div class="text-center text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide">Seg</div>
+                    <div class="text-center text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide">Ter</div>
+                    <div class="text-center text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide">Qua</div>
+                    <div class="text-center text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide">Qui</div>
+                    <div class="text-center text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide">Sex</div>
+                    <div class="text-center text-xs font-semibold text-gray-400 py-2 uppercase tracking-wide">Sáb</div>
+                </div>
+
+                <div id="calendar-grid" class="grid grid-cols-7 gap-2">
+                    <!-- Days injected via JS -->
+                </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Scheduling Details -->
+          <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl transition-all duration-500 ease-in-out min-h-[500px]">
+            
+            <!-- Date Header -->
+            <div class="flex items-center gap-6 border-b-2 border-slate-100 pb-6 mb-8">
+              <div class="w-20 h-20 bg-gradient-to-br from-primary to-primary-light rounded-2xl flex flex-col items-center justify-center text-white shadow-lg">
+                <span id="header-day-number" class="text-3xl font-bold leading-none">-</span>
+                <span id="header-month-short" class="text-xs font-bold tracking-wider mt-1 uppercase">-</span>
+              </div>
+              <div>
+                <h2 id="header-full-date" class="text-2xl font-bold text-primary">
+                  Selecione uma data
+                </h2>
+                <p id="header-weekday" class="text-gray-500 font-medium text-lg mt-1">
+                  -
+                </p>
+              </div>
+            </div>
+
+            <!-- Step 1: Select Professional -->
+            <div class="mb-10 animate-fade-in">
+              <h3 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i data-lucide="user-round" class="w-5 h-5 text-accent"></i>
+                Selecione o Profissional
+              </h3>
+              
+              <div id="professionals-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                 <!-- Professionals injected via JS -->
+              </div>
+            </div>
+
+            <!-- Step 2: Select Time -->
+            <div id="time-slots-container" class="mb-10 transition-opacity duration-500 opacity-50 pointer-events-none grayscale">
+              <h3 class="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                <i data-lucide="clock" class="w-5 h-5 text-accent"></i>
+                Horários Disponíveis
+                <span id="time-slot-hint" class="text-xs font-normal text-gray-400 ml-auto">(Selecione um médico primeiro)</span>
+              </h3>
+
+              <div id="time-slots-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+                 <!-- Time slots injected via JS -->
+              </div>
+              <div id="no-slots-message" class="hidden mt-4 p-4 bg-orange-50 text-orange-600 rounded-xl flex items-center gap-2 text-sm">
+                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                Sem horários disponíveis para este profissional nesta data.
+              </div>
+            </div>
+
+            <!-- Summary & Action -->
+            <div id="summary-container" class="hidden bg-gradient-to-br from-slate-50 to-blue-50 rounded-2xl p-6 animate-fade-in">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">
+                  Resumo do Agendamento
+                </h3>
+                
+                <div class="flex flex-wrap gap-6 mb-6">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+                      <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500 font-semibold">Profissional</p>
+                      <p id="summary-prof-name" class="text-primary font-bold">-</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+                      <i data-lucide="calendar-check" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500 font-semibold">Data</p>
+                      <p id="summary-date" class="text-primary font-bold">-</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+                      <i data-lucide="clock" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                      <p class="text-xs text-gray-500 font-semibold">Horário</p>
+                      <p id="summary-time" class="text-primary font-bold">-</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  id="confirm-btn"
+                  class="w-full bg-gradient-to-r from-primary to-primary-light text-white font-bold text-lg py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3"
+                >
+                  <i data-lucide="check-circle" class="w-6 h-6"></i>
+                  Confirmar Agendamento
+                </button>
+            </div>
+
+          </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Constants ---
+        const PROFESSIONALS = [
+            {
+                id: 1,
+                name: 'Dr. Kleber Russo',
+                specialty: 'Clínico Geral',
+                avatarUrl: 'https://picsum.photos/100/100?random=1',
+            },
+            {
+                id: 2,
+                name: 'Dra. Maria Santos',
+                specialty: 'Cardiologista',
+                avatarUrl: 'https://picsum.photos/100/100?random=2',
+            },
+            {
+                id: 3,
+                name: 'Dr. Carlos Silva',
+                specialty: 'Dermatologista',
+                avatarUrl: 'https://picsum.photos/100/100?random=3',
+            },
+        ];
+
+        const TIME_SLOTS = [
+            '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+            '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
+        ];
+
+        // --- State ---
+        const state = {
+            currentMonth: new Date(), // For calendar navigation
+            selectedDate: new Date(), // Currently selected date
+            selectedProfessional: null,
+            selectedTime: null,
+            appointments: JSON.parse(localStorage.getItem('medScheduleAppointments')) || []
+        };
+
+        // --- Helpers ---
+        function saveAppointment() {
+            if (!state.selectedDate || !state.selectedTime || !state.selectedProfessional) return;
+            
+            const dateKey = state.selectedDate.toISOString().split('T')[0];
+            const newAppt = {
+                id: Date.now().toString(),
+                dateStr: dateKey,
+                time: state.selectedTime,
+                professionalId: state.selectedProfessional.id
+            };
+            
+            state.appointments.push(newAppt);
+            localStorage.setItem('medScheduleAppointments', JSON.stringify(state.appointments));
+            
+            alert(`✅ Agendamento Confirmado!\n\n📅 ${formatDateFull(state.selectedDate)}\n⏰ ${state.selectedTime}\n👨‍⚕️ ${state.selectedProfessional.name}`);
+            
+            // Reset logic
+            state.selectedTime = null;
+            state.selectedProfessional = null;
+            renderApp();
+        }
+
+        function isSlotBooked(time) {
+            if (!state.selectedProfessional || !state.selectedDate) return false;
+            const dateKey = state.selectedDate.toISOString().split('T')[0];
+            return state.appointments.some(appt => 
+                appt.dateStr === dateKey && 
+                appt.time === time && 
+                appt.professionalId === state.selectedProfessional.id
+            );
+        }
+
+        function isBeforeToday(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date < today;
+        }
+
+        function isSameDay(d1, d2) {
+            return d1.getDate() === d2.getDate() &&
+                   d1.getMonth() === d2.getMonth() &&
+                   d1.getFullYear() === d2.getFullYear();
+        }
+
+        // --- Formatters ---
+        const formatDateFull = (date) => date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+        const formatWeekday = (date) => {
+            const str = date.toLocaleDateString('pt-BR', { weekday: 'long' });
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        };
+        const getMonthName = (date) => date.toLocaleDateString('pt-BR', { month: 'long' });
+
+        // --- Render Functions ---
+
+        function renderCalendar() {
+            const year = state.currentMonth.getFullYear();
+            const month = state.currentMonth.getMonth();
+            
+            // Update Header
+            document.getElementById('calendar-month-year').textContent = `${getMonthName(state.currentMonth)} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDayOfWeek = firstDay.getDay(); // 0 = Sunday
+
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+
+            // Empty slots
+            for (let i = 0; i < startDayOfWeek; i++) {
+                const div = document.createElement('div');
+                div.className = 'aspect-square';
+                grid.appendChild(div);
+            }
+
+            // Days
+            const today = new Date();
+            for (let i = 1; i <= daysInMonth; i++) {
+                const date = new Date(year, month, i);
+                const btn = document.createElement('button');
+                
+                const isDisabled = isBeforeToday(date);
+                const isSelected = isSameDay(date, state.selectedDate);
+                const isToday = isSameDay(date, today);
+
+                let className = "aspect-square flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-300 relative ";
+                
+                if (isDisabled) {
+                    className += "text-gray-300 cursor-not-allowed bg-gray-50";
+                    btn.disabled = true;
+                } else if (isSelected) {
+                    className += "bg-gradient-to-br from-primary to-primary-light text-white shadow-lg scale-105 font-bold cursor-default";
+                } else if (isToday) {
+                    className += "bg-blue-50 text-primary border-2 border-blue-100 hover:border-primary cursor-pointer font-bold";
+                } else {
+                    className += "text-gray-700 hover:bg-blue-50 hover:text-primary cursor-pointer";
+                }
+                
+                btn.className = className;
+                btn.textContent = i;
+                
+                if (!isDisabled) {
+                    btn.onclick = () => {
+                        state.selectedDate = date;
+                        state.selectedTime = null; // Reset time when date changes
+                        renderApp();
+                    };
+                }
+
+                grid.appendChild(btn);
+            }
+        }
+
+        function renderHeaderDetails() {
+            const d = state.selectedDate;
+            document.getElementById('header-day-number').textContent = d.getDate();
+            document.getElementById('header-month-short').textContent = d.toLocaleDateString('pt-BR', { month: 'short' });
+            document.getElementById('header-full-date').textContent = formatDateFull(d);
+            document.getElementById('header-weekday').textContent = formatWeekday(d);
+        }
+
+        function renderProfessionals() {
+            const container = document.getElementById('professionals-grid');
+            container.innerHTML = '';
+
+            PROFESSIONALS.forEach(prof => {
+                const btn = document.createElement('button');
+                const isSelected = state.selectedProfessional?.id === prof.id;
+                
+                btn.className = `
+                    relative flex items-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 text-left group
+                    ${isSelected 
+                        ? 'border-primary bg-primary text-white shadow-lg scale-[1.02]' 
+                        : 'border-slate-100 hover:border-blue-200 hover:bg-slate-50'
+                    }
+                `;
+                
+                btn.innerHTML = `
+                    <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2 ${isSelected ? 'border-white/30' : 'border-slate-100'}">
+                        <img src="${prof.avatarUrl}" alt="${prof.name}" class="w-full h-full object-cover" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-bold truncate ${isSelected ? 'text-white' : 'text-primary'}">${prof.name}</div>
+                        <div class="text-xs truncate ${isSelected ? 'text-blue-200' : 'text-gray-400'}">${prof.specialty}</div>
+                    </div>
+                `;
+
+                btn.onclick = () => {
+                    state.selectedProfessional = prof;
+                    state.selectedTime = null; // Reset time when prof changes
+                    renderApp();
+                };
+                
+                container.appendChild(btn);
+            });
+        }
+
+        function renderTimeSlots() {
+            const container = document.getElementById('time-slots-container');
+            const grid = document.getElementById('time-slots-grid');
+            const hint = document.getElementById('time-slot-hint');
+            const noSlotsMsg = document.getElementById('no-slots-message');
+            
+            grid.innerHTML = '';
+            
+            if (!state.selectedProfessional) {
+                container.classList.add('opacity-50', 'pointer-events-none', 'grayscale');
+                container.classList.remove('opacity-100');
+                hint.classList.remove('hidden');
+                noSlotsMsg.classList.add('hidden');
+                // Render dummy slots for visual placeholder
+                TIME_SLOTS.forEach(time => {
+                    const div = document.createElement('div');
+                    div.className = "py-2.5 rounded-xl text-sm font-semibold bg-white border-2 border-slate-100 text-gray-300 text-center";
+                    div.textContent = time;
+                    grid.appendChild(div);
+                });
+                return;
+            }
+
+            // Active State
+            container.classList.remove('opacity-50', 'pointer-events-none', 'grayscale');
+            container.classList.add('opacity-100');
+            hint.classList.add('hidden');
+
+            let availableCount = 0;
+
+            TIME_SLOTS.forEach(time => {
+                const btn = document.createElement('button');
+                const isBooked = isSlotBooked(time);
+                const isSelected = state.selectedTime === time;
+
+                if (!isBooked) availableCount++;
+
+                let className = `
+                    py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 relative
+                `;
+
+                if (isBooked) {
+                    className += ' bg-slate-100 text-gray-300 cursor-not-allowed decoration-slice line-through';
+                    btn.disabled = true;
+                } else if (isSelected) {
+                    className += ' bg-primary text-white shadow-md ring-2 ring-primary ring-offset-2';
+                } else {
+                    className += ' bg-white border-2 border-slate-100 text-gray-600 hover:border-primary hover:text-primary';
+                    btn.onclick = () => {
+                        state.selectedTime = time;
+                        renderApp();
+                    };
+                }
+                
+                btn.className = className;
+                btn.textContent = time;
+                grid.appendChild(btn);
+            });
+
+            if (availableCount === 0) {
+                noSlotsMsg.classList.remove('hidden');
+            } else {
+                noSlotsMsg.classList.add('hidden');
+            }
+        }
+
+        function renderSummary() {
+            const container = document.getElementById('summary-container');
+            const btn = document.getElementById('confirm-btn');
+
+            if (state.selectedDate && state.selectedTime && state.selectedProfessional) {
+                container.classList.remove('hidden');
+                
+                document.getElementById('summary-prof-name').textContent = state.selectedProfessional.name;
+                document.getElementById('summary-date').textContent = state.selectedDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                document.getElementById('summary-time').textContent = state.selectedTime;
+                
+                btn.onclick = saveAppointment;
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function renderApp() {
+            renderCalendar();
+            renderHeaderDetails();
+            renderProfessionals();
+            renderTimeSlots();
+            renderSummary();
+            lucide.createIcons();
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Calendar Nav Listeners
+            document.getElementById('prev-month').addEventListener('click', () => {
+                state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth() - 1, 1);
+                renderApp();
+            });
+            document.getElementById('next-month').addEventListener('click', () => {
+                state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth() + 1, 1);
+                renderApp();
+            });
+
+            renderApp();
+        });
+
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

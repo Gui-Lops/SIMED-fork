@@ -1,0 +1,5 @@
+{
+  "name": "MedSchedule Pro",
+  "description": "A modern, responsive medical appointment scheduling application built with React and Tailwind CSS.",
+  "requestFramePermissions": []
+}
